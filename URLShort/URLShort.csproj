@@ -7,4 +7,15 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="src\UrlShort.API\Controllers\" />
+      <Folder Include="src\UrlShort.API\Middleware\" />
+      <Folder Include="src\UrlShort.Client\Models\" />
+      <Folder Include="src\UrlShort.Core\Services\" />
+      <Folder Include="src\UrlShort.Web\Controllers\" />
+      <Folder Include="src\UrlShort.Web\Views\" />
+      <Folder Include="src\UrlShort.Web\wwwroot\" />
+      <Folder Include="tests\UrlShort.Tests\" />
+    </ItemGroup>
+
 </Project>
