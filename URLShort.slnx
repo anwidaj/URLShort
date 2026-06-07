@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/URLShort/" />
+  <Folder Name="/URLShort/src/">
+    <Project Path="URLShort/src/UrlShort.API/UrlShort.API.csproj" />
+    <Project Path="URLShort/src/UrlShort.Core/UrlShort.Core.csproj" />
+    <Project Path="URLShort/src/UrlShort.Web/UrlShort.Web.csproj" />
+  </Folder>
+</Solution>
