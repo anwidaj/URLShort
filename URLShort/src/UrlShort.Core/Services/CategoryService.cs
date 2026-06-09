@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using URLShort.UrlShort.Core.Data;
 using URLShort.UrlShort.Core.Models;
 
@@ -43,5 +43,21 @@ public class CategoryService
             .Where(c => c.UserId == userId)
             .OrderBy(c => c.Name)
             .ToListAsync();
+    }
+
+    public async Task<bool> DeleteCategory(int categoryId, int userId)
+    {
+        var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == categoryId && c.UserId == userId);
+        if (category == null) return false;
+
+        var urls = await _context.ShortUrls.Where(u => u.CategoryId == categoryId && u.UserId == userId).ToListAsync();
+        foreach (var url in urls)
+        {
+            url.CategoryId = null;
+        }
+
+        _context.Categories.Remove(category);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

@@ -84,7 +84,7 @@ public class UrlController : Controller
     {
         if (string.IsNullOrWhiteSpace(categoryName))
         {
-            TempData["Error"] = "Nazwa kategorii nie może być pusta!";
+            TempData["Error"] = "Category name cannot be empty!";
             return RedirectToAction(nameof(Index));
         }
 
@@ -98,11 +98,11 @@ public class UrlController : Controller
 
         if (newCategory == null)
         {
-            TempData["Error"] = "Kategoria o takiej nazwie już istnieje!";
+            TempData["Error"] = "Category with this name already exists!";
         }
         else
         {
-            TempData["Success"] = $"Kategoria '{categoryName}' została dodana!";
+            TempData["Success"] = $"Category '{categoryName}' added successfully!";
         }
 
         return RedirectToAction(nameof(Index));
@@ -129,5 +129,26 @@ public class UrlController : Controller
         }
         return RedirectToAction(nameof(Index));
     }
-    
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
+        var success = await _categoryService.DeleteCategory(id, currentUserId);
+        if (success)
+        {
+            TempData["Success"] = "Category deleted successfully!";
+        }
+        else
+        {
+            TempData["Error"] = "Could not delete the category.";
+        }
+        return RedirectToAction(nameof(Index));
+    }
 }
