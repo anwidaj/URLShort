@@ -6,12 +6,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDb>(options => options.UseSqlite("Data Source=urlshortener.db"));
 builder.Services.AddScoped<UrlShort.Core.Services.AuthService>();
+builder.Services.AddScoped<UrlShort.Core.Services.CategoryService>();
+builder.Services.AddScoped<UrlShort.Core.Services.UrlShortenerService>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
     });
+
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

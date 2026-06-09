@@ -1,0 +1,160 @@
+@model IEnumerable<URLShort.UrlShort.Core.Models.ShortUrl>
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+            @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show small" role="alert">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div class="card shadow-sm mb-4 border-0 rounded-3">
+        <div class="card-body">
+            <h3 class="card-title h5 mb-3 fw-bold">Shorten new link</h3>
+            <form asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label for="url" class="form-label small fw-bold">Long URL</label>
+                    <input type="url" id="url" name="url" class="form-control" placeholder="https://example.com/very-long-link" required />
+                </div>
+
+                <div class="mb-3">
+                    <label for="categoryId" class="form-label small fw-bold">Category (Optional)</label>
+                    <select id="categoryId" name="categoryId" class="form-select">
+                        <option value="">-- Select Category --</option>
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var cat in ViewBag.Categories)
+                            {
+                                <option value="@cat.Id">@cat.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="customCode" class="form-label small fw-bold">Custom Short Code (Optional)</label>
+                    <div class="input-group">
+                        <span class="input-group-text small text-muted bg-light">/r/</span>
+                        <input type="text" id="customCode" name="customCode" class="form-control" placeholder="e.g. my-promo" maxlength="20" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Generate Short Link</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body">
+            <h3 class="card-title h5 mb-3 fw-bold">Manage Categories</h3>
+            <form asp-action="CreateCategory" method="post">
+                <div class="mb-3">
+                    <label for="categoryName" class="form-label small fw-bold">New Category Name</label>
+                    <input type="text" id="categoryName" name="categoryName" class="form-control" placeholder="e.g., Work, Social, Personal" required />
+                </div>
+                <button type="submit" class="btn btn-outline-secondary w-100">Add Category</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+        <div class="col-md-9">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body">
+                    <h3 class="card-title h5 mb-3 fw-bold">Your Shortened Links</h3>
+                    
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-link-45deg display-4"></i>
+                            <p class="mt-3 mb-0">You haven't shortened any links yet. Paste a URL on the left!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light text-secondary small text-uppercase">
+                                    <tr>
+                                        <th>Original Link</th>
+                                        <th>Short URL</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th class="text-center">Clicks</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        var fullShortUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/r/{item.ShortCode}";
+                                        <tr>
+                                            <td style="max-width: 150px;" class="text-truncate">
+                                                <a href="@item.OriginalUrl" target="_blank" class="text-decoration-none text-dark" title="@item.OriginalUrl">
+                                                    @item.OriginalUrl
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <a href="@fullShortUrl" target="_blank" class="text-decoration-none fw-bold text-primary">
+                                                    @fullShortUrl
+                                                </a>
+                                            </td>
+                                            <td>
+                                                @if(item.Category != null)
+                                                {
+                                                    <span class="badge bg-secondary">@item.Category.Name</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if(item.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Disabled</span>
+                                                }
+                                            </td>
+                                            <td class="small text-muted">
+                                                @item.CreatedAt.ToString("MMM dd, yyyy")
+                                            </td>
+                                            <td class="text-center fw-bold text-secondary">
+                                                @item.Clicks.Count
+                                            </td>
+                                            <td class="text-end">
+                                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this link?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
