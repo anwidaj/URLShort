@@ -56,9 +56,11 @@ public class AuthController : Controller
 
     [SessionAuthorize]
     [HttpGet]
-    public IActionResult Profile()
+    public async Task<IActionResult> Profile()
     {
-        return View();
+        var currentUserId = HttpContext.Session.GetInt32("UserId");
+        var user = await _context.Users.FindAsync(currentUserId);
+        return View(user);
     }
 
     [SessionAuthorize]
