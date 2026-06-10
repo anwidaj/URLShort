@@ -20,28 +20,6 @@ public class AuthController : Controller
     }
 
     [HttpGet]
-    public IActionResult Register()
-    {
-        if (HttpContext.Session.GetInt32("UserId") != null) return RedirectToAction("Index", "Home");
-        return View();
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Register(RegisterViewModel model)
-    {
-        if (!ModelState.IsValid) return View(model);
-        var user = await _authService.RegisterAsync(model.Username, model.Password);
-
-        if (user == null)
-        {
-            ModelState.AddModelError("Username", "Username is in use");
-            return View(model);
-        }
-        
-        return RedirectToAction("Index", "Home");
-    }
-
-    [HttpGet]
     public IActionResult Login()
     {
         if (HttpContext.Session.GetInt32("UserId") != null) return RedirectToAction("Index", "Home");

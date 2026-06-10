@@ -49,6 +49,19 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<AppDb>();
     context.Database.EnsureCreated();
     
+    if (!context.Users.Any())
+    {
+        var admin = new URLShort.UrlShort.Core.Models.User
+        {
+            Username = "admin",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
+            Role = "Admin",
+            ApiKey = Guid.NewGuid().ToString("N"),
+            CreatedAt = DateTime.UtcNow
+        };
+        context.Users.Add(admin);
+        context.SaveChanges();
+    }
 }
 
 app.Run();
