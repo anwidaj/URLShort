@@ -32,7 +32,7 @@ public class UrlShortenerService
         }
         else
         {
-            code = await GenerateUniqueRandomCode(6);
+            code = await GenerateUniqueRandomCode(4);
         }
         
         var shortUrlObj = new ShortUrl

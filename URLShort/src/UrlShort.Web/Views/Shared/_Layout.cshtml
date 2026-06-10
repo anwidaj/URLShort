@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,7 +28,7 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
-                        @if (User.Identity?.IsAuthenticated == true)
+                        @if (HttpContextAccessor.HttpContext?.Session.GetInt32("UserId") != null)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark fw-bold" asp-controller="Url" asp-action="Index">My Dashboard</a>

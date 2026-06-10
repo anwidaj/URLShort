@@ -1,14 +1,10 @@
 
 
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SQLitePCL;
 using UrlShort.Core.Services;
 using URLShort.UrlShort.Core.Data;
 using UrlShort.Web.Models;
+using UrlShort.Web.Filters;
 
 namespace UrlShort.Web.Controllers;
 
@@ -26,7 +22,7 @@ public class AuthController : Controller
     [HttpGet]
     public IActionResult Register()
     {
-        if (User.Identity?.IsAuthenticated == true) return RedirectToAction("Index", "Home");
+        if (HttpContext.Session.GetInt32("UserId") != null) return RedirectToAction("Index", "Home");
         return View();
     }
 
@@ -48,7 +44,7 @@ public class AuthController : Controller
     [HttpGet]
     public IActionResult Login()
     {
-        if (User.Identity?.IsAuthenticated == true) return RedirectToAction("Index", "Home");
+        if (HttpContext.Session.GetInt32("UserId") != null) return RedirectToAction("Index", "Home");
         return View();
     }
 
@@ -65,44 +61,29 @@ public class AuthController : Controller
             return View(model);
         }
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Role, user.Role)
-        };
-        
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        
-        var authProperties = new AuthenticationProperties
-        {
-            IsPersistent = model.RememberMe
-        };
-        
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme, 
-            new ClaimsPrincipal(claimsIdentity), 
-            authProperties);
+        HttpContext.Session.SetInt32("UserId", user.Id);
+        HttpContext.Session.SetString("Username", user.Username);
+        HttpContext.Session.SetString("Role", user.Role);
         
         return RedirectToAction("Index", "Home");
     }
 
     [HttpGet]
     [HttpPost]
-    public async Task<IActionResult> Logout()
+    public IActionResult Logout()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        HttpContext.Session.Clear();
         return RedirectToAction("Index", "Home");
     }
 
-    [Authorize]
+    [SessionAuthorize]
     [HttpGet]
     public IActionResult Profile()
     {
         return View();
     }
 
-    [Authorize]
+    [SessionAuthorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword, string confirmNewPassword)
@@ -119,13 +100,13 @@ public class AuthController : Controller
             return RedirectToAction(nameof(Profile));
         }
         
-        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int currentUserId))
+        var currentUserId = HttpContext.Session.GetInt32("UserId");
+        if (currentUserId == null)
         {
             return RedirectToAction("Login");
         }
         
-        var user = await _context.Users.FindAsync(currentUserId);
+        var user = await _context.Users.FindAsync(currentUserId.Value);
         if (user == null)
         {
             return RedirectToAction("Login");

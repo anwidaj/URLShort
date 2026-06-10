@@ -1,14 +1,13 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UrlShort.Core.Services;
 using URLShort.UrlShort.Core.Data;
 using URLShort.UrlShort.Core.Models;
+using UrlShort.Web.Filters;
 
 namespace UrlShort.Web.Controllers;
 
-[Authorize]
+[SessionAuthorize]
 public class UrlController : Controller
 {
     private readonly UrlShortenerService  _urlShortenerService;
@@ -26,19 +25,19 @@ public class UrlController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+        var currentUserId = HttpContext.Session.GetInt32("UserId");
+        if (currentUserId == null)
         {
             return RedirectToAction("Login", "Auth");
         }
         
-        var categories = await _categoryService.GetUserCategories(currentUserId);
+        var categories = await _categoryService.GetUserCategories(currentUserId.Value);
         ViewBag.Categories = categories;
         
         var userUrls = await _context.ShortUrls
             .Include(u => u.Clicks)
             .Include(u => u.Category)
-            .Where(u => u.UserId == currentUserId)
+            .Where(u => u.UserId == currentUserId.Value)
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
         
@@ -55,13 +54,13 @@ public class UrlController : Controller
             return RedirectToAction(nameof(Index));
         }
         
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+        var currentUserId = HttpContext.Session.GetInt32("UserId");
+        if (currentUserId == null)
         {
             return RedirectToAction("Login", "Auth");
         }
         
-        var shortUrl = await _urlShortenerService.CreateShortUrl(url, currentUserId, categoryId, customCode);
+        var shortUrl = await _urlShortenerService.CreateShortUrl(url, currentUserId.Value, categoryId, customCode);
 
         if (shortUrl == null && !string.IsNullOrWhiteSpace(customCode))
         {
@@ -71,7 +70,7 @@ public class UrlController : Controller
 
         if (shortUrl != null && categoryId.HasValue)
         {
-            await _urlShortenerService.UpdateUrlCategory(shortUrl.Id, currentUserId, categoryId.Value);
+            await _urlShortenerService.UpdateUrlCategory(shortUrl.Id, currentUserId.Value, categoryId.Value);
         }
         
         TempData["Success"] = "Url shortened successfully";
@@ -88,13 +87,13 @@ public class UrlController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+        var currentUserId = HttpContext.Session.GetInt32("UserId");
+        if (currentUserId == null)
         {
             return RedirectToAction("Login", "Auth");
         }
 
-        var newCategory = await _categoryService.CreateCategory(categoryName, currentUserId);
+        var newCategory = await _categoryService.CreateCategory(categoryName, currentUserId.Value);
 
         if (newCategory == null)
         {
@@ -112,13 +111,13 @@ public class UrlController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+        var currentUserId = HttpContext.Session.GetInt32("UserId");
+        if (currentUserId == null)
         {
             return RedirectToAction("Login", "Auth");
         }
 
-        var success = await _urlShortenerService.DeleteShortUrl(id, currentUserId);
+        var success = await _urlShortenerService.DeleteShortUrl(id, currentUserId.Value);
         if (success)
         {
             TempData["Success"] = "Link deleted successfully!";
@@ -134,13 +133,13 @@ public class UrlController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteCategory(int id)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int currentUserId))
+        var currentUserId = HttpContext.Session.GetInt32("UserId");
+        if (currentUserId == null)
         {
             return RedirectToAction("Login", "Auth");
         }
 
-        var success = await _categoryService.DeleteCategory(id, currentUserId);
+        var success = await _categoryService.DeleteCategory(id, currentUserId.Value);
         if (success)
         {
             TempData["Success"] = "Category deleted successfully!";

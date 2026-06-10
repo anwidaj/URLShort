@@ -8,14 +8,14 @@ builder.Services.AddDbContext<AppDb>(options => options.UseSqlite("Data Source=u
 builder.Services.AddScoped<UrlShort.Core.Services.AuthService>();
 builder.Services.AddScoped<UrlShort.Core.Services.CategoryService>();
 builder.Services.AddScoped<UrlShort.Core.Services.UrlShortenerService>();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Auth/Login";
-        options.LogoutPath = "/Auth/Logout";
-    });
-
-
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -33,9 +33,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
+app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -50,6 +48,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDb>();
     context.Database.EnsureCreated();
+    
 }
 
 app.Run();
