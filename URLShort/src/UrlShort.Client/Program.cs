@@ -19,6 +19,16 @@ class Program
         client.DefaultRequestHeaders.Add("X-Username", Username);
         client.DefaultRequestHeaders.Add("X-Api-Key", ApiKey);
 
+        try
+        {
+            var authCheck = await client.GetAsync(BaseUrl);
+            if (!authCheck.IsSuccessStatusCode) {
+                Console.WriteLine("Authentication failed. Please check your ApiKey and Username");
+                return;
+            }
+        }
+        catch { return; }
+
         var options = new JsonSerializerOptions { WriteIndented = true };
 
         while (true)
