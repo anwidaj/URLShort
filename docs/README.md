@@ -56,3 +56,6 @@ All API requests must include `X-Username` and `X-Api-Key` headers.
 - **Database:** SQLite, Entity Framework Core
 - **Frontend:** HTML, CSS, Bootstrap, Chart.js
 - **Auth:** Custom Session-based Auth, API Keys
+
+## Author
+Developed by [Jan Wida](https://github.com/anwidaj)
