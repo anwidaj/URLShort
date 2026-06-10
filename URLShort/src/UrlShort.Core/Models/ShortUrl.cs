@@ -1,4 +1,4 @@
-﻿namespace URLShort.UrlShort.Core.Models;
+namespace URLShort.UrlShort.Core.Models;
 
 public class ShortUrl
 {
@@ -15,6 +15,5 @@ public class ShortUrl
     public int? CategoryId { get; set; }
     public Category? Category { get; set; }
 
-    public List<ShortUrlTag> ShortUrlTags { get; set; } = new();
     public List<Click> Clicks { get; set; } = new();
 }

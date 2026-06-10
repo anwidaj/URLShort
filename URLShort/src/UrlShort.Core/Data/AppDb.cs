@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using URLShort.UrlShort.Core.Models;
 
 namespace URLShort.UrlShort.Core.Data;
@@ -14,8 +14,6 @@ public class AppDb : DbContext
     public DbSet<ShortUrl> ShortUrls { get; set; }
     public DbSet<Click> Clicks { get; set; }
     public DbSet<Category> Categories { get; set; }
-    public DbSet<Tag> Tags { get; set; }
-    public DbSet<ShortUrlTag> ShortUrlTags { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder){
         base.OnModelCreating(modelBuilder);
