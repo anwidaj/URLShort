@@ -34,7 +34,15 @@ public class UrlController : ControllerBase
         var userId = GetCurrentUserId();
         var urls = await _context.ShortUrls
             .Where(u => u.UserId == userId)
-            .Select(u => new { u.Id, u.OriginalUrl, u.ShortCode, u.CreatedAt, u.IsActive })
+            .Select(u => new { 
+                u.Id, 
+                u.OriginalUrl, 
+                u.ShortCode,
+                ShortUrl = $"http://localhost:5268/r/{u.ShortCode}",
+                Category = u.Category != null ? u.Category.Name : null,
+                u.CreatedAt, 
+                u.IsActive 
+            })
             .ToListAsync();
             
         return Ok(urls);
@@ -47,6 +55,43 @@ public class UrlController : ControllerBase
         var categories = await _categoryService.GetUserCategories(userId);
         var result = categories.Select(c => new { c.Id, c.Name }).ToList();
         return Ok(result);
+    }
+
+    public class CreateCategoryRequest
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+
+    [HttpPost("categories")]
+    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name)) 
+            return BadRequest("Category name is required");
+
+        var userId = GetCurrentUserId();
+        var existing = await _categoryService.GetUserCategories(userId);
+        if (existing.Any(c => c.Name.Equals(request.Name, StringComparison.OrdinalIgnoreCase)))
+            return BadRequest("Category already exists");
+
+        var cat = new URLShort.UrlShort.Core.Models.Category { Name = request.Name, UserId = userId };
+        _context.Categories.Add(cat);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { cat.Id, cat.Name });
+    }
+
+    [HttpDelete("categories/{id}")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        var userId = GetCurrentUserId();
+        var cat = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+        
+        if (cat == null) return NotFound("Category not found");
+
+        _context.Categories.Remove(cat);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 
     public class CreateUrlRequest

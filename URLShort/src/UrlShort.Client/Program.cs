@@ -5,8 +5,8 @@ namespace UrlShort.Client;
 
 class Program
 {
-    private const string ApiKey = "841438c663a34e05bd27122d02633dae";
-    private const string Username = "admin";
+    private const string ApiKey = "";
+    private const string Username = "";
     private const string BaseUrl = "http://localhost:5268/api/url";
 
     static async Task Main(string[] args)
@@ -34,11 +34,13 @@ class Program
         while (true)
         {
             Console.WriteLine("Main Menu:");
-            Console.WriteLine("1. GET    - List all your short URLs");
-            Console.WriteLine("2. POST   - Create a new short URL");
-            Console.WriteLine("3. PUT    - Update an existing URL");
-            Console.WriteLine("4. DELETE - Delete an existing URL");
-            Console.WriteLine("5. Exit");
+            Console.WriteLine("1. List all your short URLs");
+            Console.WriteLine("2. Create a new short URL");
+            Console.WriteLine("3. Update an existing URL");
+            Console.WriteLine("4. Delete an existing URL");
+            Console.WriteLine("5. Create a new category");
+            Console.WriteLine("6. Delete a category");
+            Console.WriteLine("7. Exit");
             Console.Write("Choose an option: ");
             
             var choice = Console.ReadLine();
@@ -61,6 +63,12 @@ class Program
                         await HandleDelete(client);
                         break;
                     case "5":
+                        await HandleCreateCategory(client);
+                        break;
+                    case "6":
+                        await HandleDeleteCategory(client);
+                        break;
+                    case "7":
                         return;
                     default:
                         Console.WriteLine("Invalid option, try again");
@@ -196,6 +204,77 @@ class Program
         if (response.IsSuccessStatusCode)
         {
             Console.WriteLine($"URL with ID {id} has been successfully deleted");
+        }
+        else
+        {
+            await PrintError(response);
+        }
+    }
+
+    private static async Task HandleCreateCategory(HttpClient client)
+    {
+        Console.Write("Enter new category name: ");
+        var name = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Console.WriteLine("Category name cannot be empty");
+            return;
+        }
+
+        var payload = new { Name = name };
+        var response = await client.PostAsJsonAsync($"{BaseUrl}/categories", payload);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            var contentString = await response.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(contentString);
+            var id = jsonDoc.RootElement.GetProperty("id").GetInt32();
+            
+            Console.WriteLine($"Successfully created new category '{name}' with ID: {id}");
+        }
+        else
+        {
+            await PrintError(response);
+        }
+    }
+
+    private static async Task HandleDeleteCategory(HttpClient client)
+    {
+        var catResponse = await client.GetAsync($"{BaseUrl}/categories");
+        if (catResponse.IsSuccessStatusCode)
+        {
+            var catContent = await catResponse.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(catContent);
+            var categoriesArray = jsonDoc.RootElement.EnumerateArray().ToList();
+            
+            if (categoriesArray.Any())
+            {
+                Console.WriteLine("Available Categories:");
+                foreach (var cat in categoriesArray)
+                {
+                    Console.WriteLine($"  [{cat.GetProperty("id")}] - {cat.GetProperty("name")}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("You have no categories to delete.");
+                return;
+            }
+        }
+
+        Console.Write("Enter the ID of the category you want to delete: ");
+        if (!int.TryParse(Console.ReadLine(), out int id))
+        {
+            Console.WriteLine("Invalid ID.");
+            return;
+        }
+
+        var response = await client.DeleteAsync($"{BaseUrl}/categories/{id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Category with ID {id} has been successfully deleted");
         }
         else
         {
