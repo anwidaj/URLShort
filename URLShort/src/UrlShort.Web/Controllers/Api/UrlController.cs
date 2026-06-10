@@ -14,11 +14,13 @@ public class UrlController : ControllerBase
 {
     private readonly AppDb _context;
     private readonly UrlShortenerService _urlService;
+    private readonly CategoryService _categoryService;
 
-    public UrlController(AppDb context, UrlShortenerService urlService)
+    public UrlController(AppDb context, UrlShortenerService urlService, CategoryService categoryService)
     {
         _context = context;
         _urlService = urlService;
+        _categoryService = categoryService;
     }
 
     private int GetCurrentUserId()
@@ -38,23 +40,42 @@ public class UrlController : ControllerBase
         return Ok(urls);
     }
 
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategories()
+    {
+        var userId = GetCurrentUserId();
+        var categories = await _categoryService.GetUserCategories(userId);
+        var result = categories.Select(c => new { c.Id, c.Name }).ToList();
+        return Ok(result);
+    }
+
     public class CreateUrlRequest
     {
         public string OriginalUrl { get; set; } = string.Empty;
+        public int? CategoryId { get; set; }
+        public string? CustomCode { get; set; }
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateUrl([FromBody] CreateUrlRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.OriginalUrl))
-            return BadRequest("OriginalUrl is required.");
+            return BadRequest("OriginalUrl is required");
 
         var userId = GetCurrentUserId();
-        var shortUrl = await _urlService.CreateShortUrl(request.OriginalUrl, userId);
+        var shortUrl = await _urlService.CreateShortUrl(request.OriginalUrl, userId, request.CategoryId, request.CustomCode);
         
-        if (shortUrl == null) return BadRequest("Could not create short URL.");
+        if (shortUrl == null && !string.IsNullOrWhiteSpace(request.CustomCode))
+            return BadRequest("Custom short code is already taken");
+
+        if (shortUrl == null) return BadRequest("Could not create short URL");
+
+        if (shortUrl != null && request.CategoryId.HasValue)
+        {
+            await _urlService.UpdateUrlCategory(shortUrl.Id, userId, request.CategoryId.Value);
+        }
         
-        return CreatedAtAction(nameof(GetUrls), new { id = shortUrl.Id }, new { shortUrl.Id, shortUrl.OriginalUrl, shortUrl.ShortCode, shortUrl.CreatedAt, shortUrl.IsActive });
+        return CreatedAtAction(nameof(GetUrls), new { id = shortUrl.Id }, new { shortUrl.Id, shortUrl.OriginalUrl, shortUrl.ShortCode, shortUrl.CreatedAt, shortUrl.IsActive, shortUrl.CategoryId });
     }
 
     public class UpdateUrlRequest

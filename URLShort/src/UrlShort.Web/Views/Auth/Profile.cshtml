@@ -19,14 +19,6 @@
                         <div class="alert alert-success small">@TempData["Success"]</div>
                     }
 
-                    <div class="mb-4 bg-light p-3 rounded-3 border">
-                        <label class="form-label small fw-bold text-uppercase text-muted">Your REST API Key</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control font-monospace" value="@Model.ApiKey" readonly id="apiKeyInput" />
-                            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('apiKeyInput').value); alert('API Key copied to clipboard!');">Copy</button>
-                        </div>
-                        <small class="text-muted mt-2 d-block">Use this key in the <code>X-Api-Key</code> header along with your username in <code>X-Username</code> for API requests.</small>
-                    </div>
 
                     <form asp-action="ChangePassword" method="post">
                         <div class="mb-3">

@@ -33,6 +33,9 @@ public class UrlController : Controller
         
         var categories = await _categoryService.GetUserCategories(currentUserId.Value);
         ViewBag.Categories = categories;
+
+        var user = await _context.Users.FindAsync(currentUserId.Value);
+        ViewBag.ApiKey = user?.ApiKey;
         
         var userUrls = await _context.ShortUrls
             .Include(u => u.Clicks)

@@ -16,7 +16,7 @@ public class ApiKeyAuthAttribute : Attribute, IAsyncActionFilter
         if (!context.HttpContext.Request.Headers.TryGetValue(ApiKeyHeaderName, out var extractedApiKey) ||
             !context.HttpContext.Request.Headers.TryGetValue(UsernameHeaderName, out var extractedUsername))
         {
-            context.Result = new UnauthorizedObjectResult("API Key and Username headers are required.");
+            context.Result = new UnauthorizedObjectResult("API Key and Username headers are required");
             return;
         }
 
@@ -26,11 +26,10 @@ public class ApiKeyAuthAttribute : Attribute, IAsyncActionFilter
 
         if (user == null)
         {
-            context.Result = new UnauthorizedObjectResult("Invalid API Key or Username.");
+            context.Result = new UnauthorizedObjectResult("Invalid API Key or Username");
             return;
         }
 
-        // Store UserId in HttpContext Items for the controller to use
         context.HttpContext.Items["ApiUserId"] = user.Id;
 
         await next();
