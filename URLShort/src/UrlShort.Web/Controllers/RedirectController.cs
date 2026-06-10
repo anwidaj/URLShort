@@ -27,9 +27,9 @@ public class RedirectController : Controller
         {
             ShortUrlId = shortUrl.Id,
             ClickedAt = DateTime.UtcNow,
-            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-            UserAgent = Request.Headers["User-Agent"].ToString(),
-            Referrer =  Request.Headers["Referer"].ToString()
+            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "",
+            UserAgent = Request.Headers["User-Agent"].ToString() ?? "",
+            Referrer =  Request.Headers["Referer"].ToString() ?? ""
         };
         
         _context.Add(click);

@@ -1,14 +1,14 @@
 ﻿@model UrlShort.Web.Models.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Rejestracja";
+    ViewData["Title"] = "Register";
 }
 
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="card-title text-center mb-4">Załóż konto</h2>
+                <h2 class="card-title text-center mb-4">Create account</h2>
                 
                 <form asp-action="Register" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -31,11 +31,11 @@
                         <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-100">Zarejestruj się</button>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
                 </form>
                 
                 <div class="text-center mt-3">
-                    <p class="small mb-0">Masz już konto? <a asp-action="Login">Zaloguj się</a></p>
+                    <p class="small mb-0">Don't have an account? <a asp-action="Login">Register now</a></p>
                 </div>
             </div>
         </div>

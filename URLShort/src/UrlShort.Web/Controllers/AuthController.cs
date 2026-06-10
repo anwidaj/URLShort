@@ -3,8 +3,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SQLitePCL;
 using UrlShort.Core.Services;
+using URLShort.UrlShort.Core.Data;
 using UrlShort.Web.Models;
 
 namespace UrlShort.Web.Controllers;
@@ -12,10 +15,12 @@ namespace UrlShort.Web.Controllers;
 public class AuthController : Controller
 {
     private readonly AuthService _authService;
+    private readonly AppDb _context;
 
-    public AuthController(AuthService authService)
+    public AuthController(AuthService authService, AppDb context)
     {
         _authService = authService;
+        _context = context;
     }
 
     [HttpGet]
@@ -82,11 +87,62 @@ public class AuthController : Controller
         return RedirectToAction("Index", "Home");
     }
 
+    [HttpGet]
     [HttpPost]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
+
+    [Authorize]
+    [HttpGet]
+    public IActionResult Profile()
+    {
+        return View();
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(string oldPassword, string newPassword, string confirmNewPassword)
+    {
+        if (string.IsNullOrWhiteSpace(oldPassword) || string.IsNullOrWhiteSpace(newPassword))
+        {
+            TempData["Error"] = "Passwords cannot be empty";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        if (newPassword != confirmNewPassword)
+        {
+            TempData["Error"] =  "Passwords do not match";
+            return RedirectToAction(nameof(Profile));
+        }
+        
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int currentUserId))
+        {
+            return RedirectToAction("Login");
+        }
+        
+        var user = await _context.Users.FindAsync(currentUserId);
+        if (user == null)
+        {
+            return RedirectToAction("Login");
+        }
+        
+        if (!BCrypt.Net.BCrypt.Verify(oldPassword, user.PasswordHash))
+        {
+            TempData["Error"] = "Old password is incorrect";
+            return RedirectToAction(nameof(Profile));
+        }
+        
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await  _context.SaveChangesAsync();
+        
+        TempData["Success"] = "Password has been changed";
+        return RedirectToAction(nameof(Profile));
+    }
+    
 }
     
