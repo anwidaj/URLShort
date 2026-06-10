@@ -49,7 +49,7 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<AppDb>();
     context.Database.EnsureCreated();
     
-    if (!context.Users.Any())
+    if (!context.Users.Any(u => u.Username == "admin"))
     {
         var admin = new URLShort.UrlShort.Core.Models.User
         {

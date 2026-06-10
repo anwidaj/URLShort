@@ -1,0 +1,120 @@
+@model UrlShort.Web.Models.StatsViewModel
+@{
+    ViewData["Title"] = "Analytics";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Analytics Dashboard</h2>
+        <h4 class="text-muted mb-0">Total clicks: <span class="text-dark fw-bold">@Model.TotalClicks</span></h4>
+    </div>
+
+    <div class="row">
+        <!-- Top 5 Links -->
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm rounded-4 h-100 border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold mb-4">Top 5 Links</h5>
+                    @if (!Model.TopUrls.Any())
+                    {
+                        <p class="text-muted">No data available yet.</p>
+                    }
+                    else
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach(var url in Model.TopUrls)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3 mb-2 rounded-3 bg-light">
+                                    <div class="px-3 text-truncate" style="max-width: 70%;">
+                                        <div class="fw-bold text-dark text-truncate">@url.OriginalUrl</div>
+                                        <small class="text-muted">/r/@url.ShortCode</small>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill px-3 py-2 fs-6 me-3 shadow-sm">@url.Clicks.Count clicks</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Browser Stats -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm rounded-4 border-0 h-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold mb-4">Clicks by Browser</h5>
+                    @foreach(var stat in Model.BrowserStats.OrderByDescending(x => x.Value))
+                    {
+                        var percentage = Model.TotalClicks > 0 ? (stat.Value * 100) / Model.TotalClicks : 0;
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold">@stat.Key</span>
+                                <span class="text-muted fw-bold">@stat.Value</span>
+                            </div>
+                            <div class="progress rounded-pill shadow-sm" style="height: 12px;">
+                                <div class="progress-bar bg-info rounded-pill" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    }
+                    @if(!Model.BrowserStats.Any()){
+                        <p class="text-muted">No data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Referrer Stats -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm rounded-4 border-0 h-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold mb-4">Traffic Sources</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach(var stat in Model.ReferrerStats.OrderByDescending(x => x.Value).Take(6))
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3">
+                                <span class="fw-semibold text-dark text-truncate" style="max-width: 80%;">
+                                    @(string.IsNullOrWhiteSpace(stat.Key) || stat.Key == "Direct" ? "Direct Traffic" : stat.Key)
+                                </span>
+                                <span class="badge bg-secondary rounded-pill">@stat.Value</span>
+                            </li>
+                        }
+                    </ul>
+                    @if(!Model.ReferrerStats.Any()){
+                        <p class="text-muted">No data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Category Stats -->
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm rounded-4 border-0 h-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-bold mb-4">Clicks by Category</h5>
+                    <div class="row">
+                        @foreach(var stat in Model.CategoryStats.OrderByDescending(x => x.Value))
+                        {
+                            var percentage = Model.TotalClicks > 0 ? (stat.Value * 100) / Model.TotalClicks : 0;
+                            <div class="col-md-4 mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="fw-semibold text-truncate me-2" title="@stat.Key">@stat.Key</span>
+                                    <span class="text-muted fw-bold">@stat.Value</span>
+                                </div>
+                                <div class="progress rounded-pill shadow-sm" style="height: 12px;">
+                                    <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: @percentage%" aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    @if(!Model.CategoryStats.Any()){
+                        <p class="text-muted">No data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
