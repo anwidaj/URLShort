@@ -52,17 +52,36 @@
             }
             else
             {
-                <table class="table table-sm table-borderless mt-2">
-                    <tbody>
-                        @foreach(var stat in Model.BrowserStats.OrderByDescending(x => x.Value))
-                        {
-                            <tr>
-                                <td>@stat.Key</td>
-                                <td class="text-end fw-bold">@stat.Value</td>
-                            </tr>
+                <canvas id="browserChart" style="max-height: 250px;"></canvas>
+
+                <!-- Loading Chart.js from CDN -->
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    const ctx = document.getElementById('browserChart').getContext('2d');
+                    
+                    const chartLabels = @Html.Raw(Json.Serialize(Model.BrowserStats.Keys));
+                    const chartData = @Html.Raw(Json.Serialize(Model.BrowserStats.Values));
+
+                    new Chart(ctx, {
+                        type: 'pie', 
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                data: chartData,
+                                backgroundColor: [
+                                    '#0d6efd', '#198754', '#e8b006ff', '#dc3545', '#0dcaf0', '#6c757d'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
                         }
-                    </tbody>
-                </table>
+                    });
+                </script>
             }
         </div>
 

@@ -34,17 +34,14 @@ public class StatsController : Controller
 
         var allClicks = urls.SelectMany(u => u.Clicks).ToList();
 
-        // Browser parsing
         viewModel.BrowserStats = allClicks
             .GroupBy(c => ParseBrowser(c.UserAgent))
             .ToDictionary(g => g.Key, g => g.Count());
 
-        // Referrer parsing
         viewModel.ReferrerStats = allClicks
             .GroupBy(c => string.IsNullOrWhiteSpace(c.Referrer) ? "Direct" : c.Referrer)
             .ToDictionary(g => g.Key, g => g.Count());
 
-        // Category parsing
         viewModel.CategoryStats = urls
             .SelectMany(u => u.Clicks.Select(c => new { Click = c, CategoryName = u.Category?.Name ?? "No Category" }))
             .GroupBy(x => x.CategoryName)
@@ -56,15 +53,10 @@ public class StatsController : Controller
     private string ParseBrowser(string userAgent)
     {
         if (string.IsNullOrWhiteSpace(userAgent)) return "Unknown";
-        
-        // Browsers built on Chromium often include "Chrome" in their user agent,
-        // so we must check for their specific identifiers BEFORE checking for Chrome.
-        if (userAgent.Contains("OPR") || userAgent.Contains("Opera")) return "Opera";
         if (userAgent.Contains("Edg")) return "Edge";
+        if (userAgent.Contains("Chrome") && !userAgent.Contains("Edg")) return "Chrome";
         if (userAgent.Contains("Firefox")) return "Firefox";
-        if (userAgent.Contains("Chrome")) return "Chrome";
-        if (userAgent.Contains("Safari") && !userAgent.Contains("Chrome") && !userAgent.Contains("Chromium")) return "Safari";
-        
+        if (userAgent.Contains("Safari") && !userAgent.Contains("Chrome")) return "Safari";
         return "Other";
     }
 }
