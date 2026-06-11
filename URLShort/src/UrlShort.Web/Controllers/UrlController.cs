@@ -82,7 +82,7 @@ public class UrlController : Controller
     
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateCategory(string categoryName)
+    public async Task<IActionResult> AddCategory(string categoryName)
     {
         if (string.IsNullOrWhiteSpace(categoryName))
         {
@@ -134,7 +134,7 @@ public class UrlController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteCategory(int id)
+    public async Task<IActionResult> RemoveCategory(int id)
     {
         var currentUserId = HttpContext.Session.GetInt32("UserId");
         if (currentUserId == null)

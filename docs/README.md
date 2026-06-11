@@ -3,6 +3,12 @@
 A full-stack URL shortening platform built with **ASP.NET Core 10**. 
 This project provides a web interface, a REST API, and an interactive Console Client.
 
+## Screenshots
+
+![Dashboard/App View 1](img/img1.png)
+
+![Dashboard/App View 2](img/img2.png)
+
 ## Features
 
 - **Authentication & Roles**: Built entirely on top of `HttpContext.Session`. Includes an exclusive Admin Panel for managing user accounts. Public registration is restricted by default.
@@ -19,6 +25,9 @@ The solution follows separation of concerns and is divided into three projects:
 3. **`UrlShort.Client`**: A C# Console Application that acts as an interactive client for the REST API.
 
 ## Running the Application
+
+### Prerequisites
+- The **.NET 10 SDK** must be installed on your machine.
 
 ### 1. Start the Web Server
 Navigate to the `UrlShort.Web` directory and run the server:

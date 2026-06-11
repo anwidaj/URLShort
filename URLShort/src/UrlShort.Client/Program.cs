@@ -5,8 +5,8 @@ namespace UrlShort.Client;
 
 class Program
 {
-    private const string ApiKey = "";
-    private const string Username = "";
+    private const string ApiKey = "YOUR_API_KEY_HERE";
+    private const string Username = "YOUR_USERNAME_HERE";
     private const string BaseUrl = "http://localhost:5268/api/url";
 
     static async Task Main(string[] args)

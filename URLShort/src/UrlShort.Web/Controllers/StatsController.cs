@@ -56,10 +56,15 @@ public class StatsController : Controller
     private string ParseBrowser(string userAgent)
     {
         if (string.IsNullOrWhiteSpace(userAgent)) return "Unknown";
+        
+        // Browsers built on Chromium often include "Chrome" in their user agent,
+        // so we must check for their specific identifiers BEFORE checking for Chrome.
+        if (userAgent.Contains("OPR") || userAgent.Contains("Opera")) return "Opera";
         if (userAgent.Contains("Edg")) return "Edge";
-        if (userAgent.Contains("Chrome") && !userAgent.Contains("Edg")) return "Chrome";
         if (userAgent.Contains("Firefox")) return "Firefox";
-        if (userAgent.Contains("Safari") && !userAgent.Contains("Chrome")) return "Safari";
+        if (userAgent.Contains("Chrome")) return "Chrome";
+        if (userAgent.Contains("Safari") && !userAgent.Contains("Chrome") && !userAgent.Contains("Chromium")) return "Safari";
+        
         return "Other";
     }
 }

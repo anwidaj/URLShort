@@ -70,7 +70,7 @@
             <div class="card shadow-sm border-0 rounded-3 mb-4">
                 <div class="card-body">
                     <h3 class="card-title h5 mb-3 fw-bold">Manage Categories</h3>
-                    <form asp-action="CreateCategory" method="post">
+                    <form asp-action="AddCategory" method="post">
                         <div class="mb-3">
                             <label for="categoryName" class="form-label small fw-bold">New Category Name</label>
                             <input type="text" id="categoryName" name="categoryName" class="form-control" placeholder="e.g., Work, Social" required />
@@ -86,7 +86,7 @@
                             {
                                 <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                     <span class="fw-bold text-secondary">@cat.Name</span>
-                                    <form asp-action="DeleteCategory" asp-route-id="@cat.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this category? Links using this category will NOT be deleted, they will just lose the category label.');">
+                                    <form asp-action="RemoveCategory" asp-route-id="@cat.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this category? Links using this category will NOT be deleted, they will just lose the category label.');">
                                         <button type="submit" class="btn btn-sm text-danger border-0 p-0" title="Delete">X</button>
                                     </form>
                                 </li>
